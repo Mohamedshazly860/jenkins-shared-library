@@ -1,9 +1,7 @@
 @Library('my-shared-library')_
 
 pipeline {
-    agent {
-        label 'agent-01'
-    }
+    agent any
     
     tools {
         maven 'maven-354'
