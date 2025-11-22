@@ -1,9 +1,5 @@
 node() {
-   
-        env.JAVA_HOME = tool 'jdk-11'
-        env.M2_HOME = tool 'maven-354'
-        env.PATH = "${env.JAVA_HOME}/bin:${env.M2_HOME}/bin:${env.PATH}"
-        
+    try {
         stage('Checkout Code') {
             git branch: 'main', url: 'https://github.com/Mohamedshazly860/jenkins-shared-library.git'
             sh 'ls -la'
@@ -20,12 +16,27 @@ node() {
         
         stage('Test') {
             sh 'mvn test'
+            junit 'target/surefire-reports/*.xml'
         }
         
         stage('Package') {
             sh 'mvn package -DskipTests'
         }
         
+        stage('Archive') {
+            archiveArtifacts artifacts: 'target/*.jar', fingerprint: true
+        }
         
+        stage('Success') {
+            echo '🎊 Scripted pipeline completed successfully!'
+        }
         
+    } catch (Exception e) {
+        currentBuild.result = 'FAILURE'
+        throw e
+    } finally {
+        stage('Cleanup') {
+            cleanWs()
+        }
+    }
 }
