@@ -1,4 +1,4 @@
-node('agent-01') {
+node() {
    
         env.JAVA_HOME = tool 'jdk-11'
         env.M2_HOME = tool 'maven-354'
