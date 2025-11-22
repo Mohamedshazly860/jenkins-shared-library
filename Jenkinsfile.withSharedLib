@@ -1,0 +1,67 @@
+@Library('my-shared-library')_
+
+pipeline {
+    agent {
+        label 'agent-01'
+    }
+    
+    tools {
+        maven 'maven-354'
+        jdk 'jdk-11'
+    }
+
+    
+    stages {
+        stage('Initialize') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Mohamedshazly860/jenkins-shared-library.git'
+                
+                script {
+                    def helper = new com.example.JavaHelper(this)
+                    helper.getBuildInfo()
+                    helper.validateJavaProject()
+                    
+                    javaUtils.showJavaVersion()
+                    javaUtils.showMavenVersion()
+                }
+            }
+        }
+        
+        stage('Build & Package') {
+            steps {
+                script {
+                    javaUtils.buildMaven(params.PROJECT_NAME)
+                    
+                    if (params.RUN_TESTS) {
+                        javaUtils.testMaven()
+                    }
+                    
+                    javaUtils.packageMaven()
+                }
+            }
+        }
+        
+        stage('Quality Check') {
+            steps {
+                script {
+                    def helper = new com.example.JavaHelper(this)
+                    helper.runSecurityCheck()
+                    
+                    if (params.RUN_TESTS) {
+                        helper.generateTestReport()
+                    }
+                }
+            }
+        }
+        
+        stage('Archive') {
+            steps {
+                script {
+                    javaUtils.archiveJar()
+                }
+            }
+        }
+    }
+    
+    
+}

@@ -1,0 +1,57 @@
+pipeline {
+    agent {
+        label 'agent-01'
+    }
+    
+    tools {
+        maven 'maven-354'
+        jdk 'jdk-11'
+    }
+    
+    
+    stages {
+        stage('Checkout') {
+            steps {
+                git branch: 'main', url: 'https://github.com/Mohamedshazly860/jenkins-shared-library'
+                sh 'ls -la'
+            }
+        }
+        
+        stage('Environment Setup') {
+            steps {
+                sh 'java -version'
+                sh 'mvn --version'
+            }
+        }
+        
+        stage('Build') {
+            steps {
+                script {
+                    echo "Building with type: ${params.BUILD_TYPE}"
+                    
+                    if (params.BUILD_TYPE == 'compile') {
+                        sh 'mvn clean compile'
+                    } else if (params.BUILD_TYPE == 'package') {
+                        sh 'mvn clean package -DskipTests'
+                    } else if (params.BUILD_TYPE == 'install') {
+                        sh 'mvn clean install -DskipTests'
+                    }
+                }
+            }
+        }
+        
+        stage('Test') {
+            when {
+                expression { params.RUN_TESTS == true }
+            }
+            steps {
+                sh 'mvn test'
+            }
+            
+        }
+        
+        
+    }
+    
+    
+}

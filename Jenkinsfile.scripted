@@ -1,0 +1,31 @@
+node('agent-01') {
+   
+        env.JAVA_HOME = tool 'jdk-11'
+        env.M2_HOME = tool 'maven-354'
+        env.PATH = "${env.JAVA_HOME}/bin:${env.M2_HOME}/bin:${env.PATH}"
+        
+        stage('Checkout Code') {
+            git branch: 'main', url: 'https://github.com/Mohamedshazly860/jenkins-shared-library.git'
+            sh 'ls -la'
+        }
+        
+        stage('Environment Info') {
+            sh 'java -version'
+            sh 'mvn --version'
+        }
+        
+        stage('Compile') {
+            sh 'mvn clean compile'
+        }
+        
+        stage('Test') {
+            sh 'mvn test'
+        }
+        
+        stage('Package') {
+            sh 'mvn package -DskipTests'
+        }
+        
+        
+        
+}
